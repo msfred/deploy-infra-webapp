@@ -1,0 +1,31 @@
+name: 'Test the Composite Action'
+
+on:
+  workflow_dispatch:
+
+env:
+  location: 'eastus'
+
+jobs:
+  composite-action:
+    name: 'Composite Action'
+    runs-on: 'ubuntu-latest'
+
+    steps:
+    - name: 'Deploy infrastructure & application to the development environment'
+      uses: msfred/deploy-infra-webapp@main
+      with:
+        azureClientId: ${{ secrets.AZURE_CLIENT_ID }}
+        azureSubscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        azureTenantId: ${{ secrets.AZURE_TENANT_ID }}
+        environmentId: 'development'
+        location: ${{ env.location }}
+
+    - name: 'Deploy infrastructure & application to the production environment'
+      uses: msfred/deploy-infra-webapp@main
+      with:
+        azureClientId: ${{ secrets.AZURE_CLIENT_ID }}
+        azureSubscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        azureTenantId: ${{ secrets.AZURE_TENANT_ID }}
+        environmentId: 'production'
+        location: ${{ env.location }}

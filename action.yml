@@ -1,40 +1,40 @@
-name: DeployInfraWebapp
-description: Deploys Infrastructure and WebApp
+name: 'DeployInfraWebapp'
+description: 'Deploys Infrastructure and WebApp'
 
 inputs:
   azureClientId:
-    description: Azure App Registration Client ID
+    description: 'Azure App Registration Client ID'
     required: true
   azureSubscriptionId:
-    description: Azure Subscription ID
+    description: 'Azure Subscription ID'
     required: true
   azureTenantId:
-    description: Azure Tenant ID
+    description: 'Azure Tenant ID'
     required: true
   deploymentSlotName:
-    description: Name of the deployment slot.  If not specified, uses Production.
+    description: 'Name of the deployment slot.  If not specified, uses Production.'
     required: false
     default: Production
   environmentId:
-    description: Short name for the environment being deployed to
+    description: 'Short name for the environment being deployed to'
     required: true
   location:
-    description: Azure location where the subscription will record logs for deployments
+    description: 'Azure location where the subscription will record logs for deployments'
     required: true
 
 outputs:
   resourceGroupName:
-    description: Name of the Azure Resource Group that contains the WebApp
+    description: 'Name of the Azure Resource Group that contains the WebApp'
     value: ${{ steps.deployStep.outputs.resourceGroupName }}
   webAppName:
-    description: Name of the Azure WebApp that the application is deployed to
+    description: 'Name of the Azure WebApp that the application is deployed to'
     value: ${{ steps.deployStep.outputs.webAppName }}
 
 runs:
   using: composite
   steps:
     # Download Artifacts
-    - name: Download Artifacts
+    - name: 'Download Artifacts'
       uses: actions/download-artifact@v3
       continue-on-error: false
         
@@ -56,13 +56,22 @@ runs:
         parameters: ./infra/main.${{ inputs.environmentId }}.parameters.json
 
     # Deploy code to web app
-    - name: Deploy code to the WebApp
+    - name: 'Deploy code to the WebApp'
       uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ steps.deployStep.outputs.webAppName }}
         slot-name: ${{ inputs.deploymentSlotName }}
         package: ./build
 
-    - name: Deployment Message
+    - name: 'Deployment Message'
       run: echo "Deployed Application to ${{ inputs.environmentId }}"
+      shell: bash
+
+    - name: 'Create Summary Log Message'
+      run: |
+        echo '# DeployInfraWebApp'
+        echo 'Infrastructure deployed to Azure:'
+        echo '- Subscription ID: **${{ inputs.azureSubscriptionId }}**'
+        echo '- Resource Group: **${{ steps.deployStep.outputs.resourceGroupName }}**'
+        echo 'Application deployed to Azure WebApp: **${{ steps.deployStep.outputs.webAppName }}**'
       shell: bash
