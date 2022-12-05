@@ -5,27 +5,48 @@ inputs:
   azureClientId:
     description: 'Azure App Registration Client ID'
     required: true
+
   azureSubscriptionId:
     description: 'Azure Subscription ID'
     required: true
+
   azureTenantId:
     description: 'Azure Tenant ID'
     required: true
+
   deploymentSlotName:
     description: 'Name of the deployment slot.  If not specified, uses Production.'
     required: false
     default: Production
+
   environmentId:
     description: 'Short name for the environment being deployed to'
     required: true
+
   location:
     description: 'Azure location where the subscription will record logs for deployments'
     required: true
+
+  package:
+    description: 'Path to the build package'
+    required: false
+    default: ./build
+
+  parameterFile:
+    description: 'Path to the ARM parameters file'
+    required: false
+    default: './infra/main.${{ inputs.environmentId }}.parameters.json'
+
+  templateFile:
+    description: 'Path to the ARM template (JSON or Bicep)'
+    required: false
+    default: './infra/main.bicep'
 
 outputs:
   resourceGroupName:
     description: 'Name of the Azure Resource Group that contains the WebApp'
     value: ${{ steps.deployStep.outputs.resourceGroupName }}
+    
   webAppName:
     description: 'Name of the Azure WebApp that the application is deployed to'
     value: ${{ steps.deployStep.outputs.webAppName }}
@@ -52,8 +73,8 @@ runs:
         scope: subscription
         subscriptionId: ${{ inputs.azureSubscriptionId }}
         region: ${{ inputs.location }}
-        template: ./infra/main.bicep
-        parameters: ./infra/main.${{ inputs.environmentId }}.parameters.json
+        template: ${{ inputs.templateFile }}
+        parameters: ${{ inputs.parametersFile }}
 
     # Deploy code to web app
     - name: 'Deploy code to the WebApp'
@@ -61,7 +82,7 @@ runs:
       with:
         app-name: ${{ steps.deployStep.outputs.webAppName }}
         slot-name: ${{ inputs.deploymentSlotName }}
-        package: ./build
+        package: ${{ inputs.package }}
 
     - name: 'Deployment Message'
       run: echo "Deployed Application to ${{ inputs.environmentId }}"
@@ -69,9 +90,9 @@ runs:
 
     - name: 'Create Summary Log Message'
       run: |
-        echo '# DeployInfraWebApp'
-        echo 'Infrastructure deployed to Azure:'
-        echo '- Subscription ID: **${{ inputs.azureSubscriptionId }}**'
-        echo '- Resource Group: **${{ steps.deployStep.outputs.resourceGroupName }}**'
-        echo 'Application deployed to Azure WebApp: **${{ steps.deployStep.outputs.webAppName }}**'
+        echo '# DeployInfraWebApp' >> $GITHUB_STEP_SUMMARY
+        echo 'Infrastructure deployed to Azure:' >> $GITHUB_STEP_SUMMARY
+        echo '- Subscription ID: **${{ inputs.azureSubscriptionId }}**' >> $GITHUB_STEP_SUMMARY
+        echo '- Resource Group: **${{ steps.deployStep.outputs.resourceGroupName }}**' >> $GITHUB_STEP_SUMMARY
+        echo 'Application deployed to Azure WebApp: **${{ steps.deployStep.outputs.webAppName }}**' >> $GITHUB_STEP_SUMMARY
       shell: bash
