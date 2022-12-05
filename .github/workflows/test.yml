@@ -7,8 +7,8 @@ env:
   location: 'eastus'
 
 jobs:
-  composite-action:
-    name: 'Composite Action'
+  composite-action-development:
+    name: 'Development'
     runs-on: 'ubuntu-latest'
 
     steps:
@@ -21,6 +21,11 @@ jobs:
         environmentId: 'development'
         location: ${{ env.location }}
 
+  composite-action-production:
+    name: 'Production'
+    runs-on: 'ubuntu-latest'
+
+    steps:
     - name: 'Deploy infrastructure & application to the production environment'
       uses: msfred/deploy-infra-webapp@main
       with:
