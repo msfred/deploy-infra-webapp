@@ -3,6 +3,9 @@ name: 'Test the Composite Action'
 on:
   workflow_dispatch:
 
+permissions:
+  id-token: write
+
 env:
   location: 'eastus'
 
