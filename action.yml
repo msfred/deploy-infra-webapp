@@ -35,7 +35,7 @@ inputs:
   parameterFile:
     description: 'Path to the ARM parameters file'
     required: false
-    default: './infra/main.${{ inputs.environmentId }}.parameters.json'
+    default: './infra/main.parameters.json'
 
   templateFile:
     description: 'Path to the ARM template (JSON or Bicep)'
@@ -91,6 +91,7 @@ runs:
     - name: 'Create Summary Log Message'
       run: |
         echo '# DeployInfraWebApp' >> $GITHUB_STEP_SUMMARY
+        echo '## :rocket: ${{ inputs.environmentId }}' >> $GITHUB_STEP_SUMMARY
         echo 'Infrastructure deployed to Azure:' >> $GITHUB_STEP_SUMMARY
         echo '- Subscription ID: **${{ inputs.azureSubscriptionId }}**' >> $GITHUB_STEP_SUMMARY
         echo '- Resource Group: **${{ steps.deployStep.outputs.resourceGroupName }}**' >> $GITHUB_STEP_SUMMARY
